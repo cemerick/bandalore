@@ -28,6 +28,20 @@ or your leiningen project.clj:
 [cemerick/bandalore "0.0.1"]
 ----
 
+== Logging
+
+I strongly recommend squelching the AWS SDK's very verbose logging
+before using Bandalore (the former spews a variety of stuff out on
+INFO that I personally think should be in DEBUG or TRACE).  You can
+do this with this snippet:
+
+----
+(.setLevel (java.util.logging.Logger/getLogger "com.amazonaws")
+  java.util.logging.Level/WARNING)
+----
+
+Translate as necessary if you're using log4j, etc.
+
 == Usage
 
 You should be familiar with http://aws.amazon.com/sqs/[SQS itself]
