@@ -6,6 +6,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>bandalore</name>
     <description>A Clojure library for Amazon's Simple Queue Service (SQS).</description>
+    <url>http://github.com/cemerick/bandalore</url>
 
     <parent>
         <groupId>org.clojure</groupId>

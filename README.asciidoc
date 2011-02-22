@@ -8,17 +8,13 @@ therein.
 
 == "Installation"
 
-+++<del>Bandalore is available in Maven central.</del>+++
-
-*I'll get Bandalore releases to central in the next couple of days, promise. :-)*
-
-Add it to your Maven project's `pom.xml`:
+Bandalore is available in Maven central.  Add it to your Maven project's `pom.xml`:
 
 ----
 <dependency>
   <groupId>cemerick</groupId>
   <artifactId>bandalore</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
 </dependency>
 ----
 
