@@ -53,8 +53,11 @@
 
 (defn queue-attrs
   "Gets or sets the attributes of a queue specified by its URL string.
+   
    When setting attributes on a queue, the attribute map must have String keys
-   and values."
+   and values.  Note that the SQS API only supports setting one queue attribute
+   per request, so each attribute name/value pair in the provided `attr-map`
+   will provoke a separate API request."
   ([^AmazonSQSClient client queue-url]
     (->>
       (.withAttributeNames (GetQueueAttributesRequest. queue-url) #{"All"})
@@ -62,8 +65,9 @@
       .getAttributes
       (into {})))
   ([^AmazonSQSClient client queue-url attr-map]
-    (.setQueueAttributes client
-      (SetQueueAttributesRequest. queue-url attr-map))))
+    (doseq [[k v] attr-map]
+      (.setQueueAttributes client
+        (SetQueueAttributesRequest. queue-url {(str k) (str v)})))))
          
 (defn send
   "Sends a new message with the given string body to the queue specified
