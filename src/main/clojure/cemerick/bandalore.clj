@@ -111,7 +111,7 @@
    :source-queue - the URL of the queue from which the message was received"
   [^AmazonSQSClient client queue-url & {:keys [limit visibility ^java.util.Collection attributes]
                                         :or {limit 1
-                                             attributes #{"All"}}}]
+                                             attributes #{}}}]
   (let [req (-> (ReceiveMessageRequest. queue-url)
               (.withMaxNumberOfMessages (-> limit (min 10) (max 1)))
               (.withAttributeNames attributes))
