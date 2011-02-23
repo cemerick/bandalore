@@ -12,7 +12,7 @@ Bandalore is available in Maven central.  Add it to your Maven project's `pom.xm
 
 ----
 <dependency>
-  <groupId>cemerick</groupId>
+  <groupId>com.cemerick</groupId>
   <artifactId>bandalore</artifactId>
   <version>0.0.1</version>
 </dependency>
@@ -21,7 +21,7 @@ Bandalore is available in Maven central.  Add it to your Maven project's `pom.xm
 or your leiningen project.clj:
 
 ----
-[cemerick/bandalore "0.0.1"]
+[com.cemerick/bandalore "0.0.1"]
 ----
 
 == Logging
