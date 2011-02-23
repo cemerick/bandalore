@@ -250,7 +250,14 @@ Have maven.  From the command line:
 $ mvn clean install
 ----
 
-The tests are all live, so you either need to add your AWS credentials to your
+*The tests are all live*, so:
+
+1. They create and delete queues (though with unique queue names).
+2. They aren't written to be particularly efficient w.r.t. SQS usage. If you do decide to run the tests, the associated fees should be trivial (or nonexistent if your account is under the SQS free usage cap).
+
+In any case, you are so warned.  Make a new AWS account dedicated to testing if you're concerned on either count. 
+
+Since the tests are live, you either need to add your AWS credentials to your
 `~/.m2/settings.xml` file as properties, or specify them on the command line
 using `-D` switches:
 
@@ -258,7 +265,7 @@ using `-D` switches:
 $ mvn -Daws.id=XXXXXXX -Daws.secret-key=YYYYYYY clean install
 ----
 
-Or, you can skip the tests entirely if you're brave:
+Or, you can skip the tests entirely:
 
 ----
 $ mvn -Dmaven.test.skip=true clean install
