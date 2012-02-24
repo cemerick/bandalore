@@ -1,44 +1,46 @@
-= Bandalore
+# Bandalore
 
-http://github.com/cemerick/bandalore[Bandalore] is a Clojure client
-library for Amazon's http://aws.amazon.com/sqs/[Simple Queue Service (SQS)].  It depends upon
-the standard http://aws.amazon.com/sdkforjava/[AWS SDK for Java],
+[Bandalore](http://github.com/cemerick/bandalore) is a Clojure client
+library for Amazon's [Simple Queue Service](http://aws.amazon.com/sqs/).  It depends upon
+the standard [AWS SDK for Java](http://aws.amazon.com/sdkforjava/),
 and provides a Clojure-idiomatic API for the SQS-related functionality
 therein.
 
-== "Installation"
+## "Installation"
 
 Bandalore is available in Maven central.  Add it to your Maven project's `pom.xml`:
 
-----
+```xml
 <dependency>
   <groupId>com.cemerick</groupId>
   <artifactId>bandalore</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 </dependency>
-----
+```
 
 or your leiningen project.clj:
 
-----
-[com.cemerick/bandalore "0.0.1"]
-----
+```clojure
+[com.cemerick/bandalore "0.0.2"]
+```
 
-== Logging
+Bandalore is compatible with Clojure 1.2.0 - 1.4.0.
+
+## Logging
 
 I strongly recommend squelching the AWS SDK's very verbose logging
 before using Bandalore (the former spews a variety of stuff out on
 INFO that I personally think should be in DEBUG or TRACE).  You can
 do this with this snippet:
 
-----
+```clojure
 (.setLevel (java.util.logging.Logger/getLogger "com.amazonaws")
   java.util.logging.Level/WARNING)
-----
+```
 
 Translate as necessary if you're using log4j, etc.
 
-== Usage
+## Usage
 
 You should be familiar with http://aws.amazon.com/sqs/[SQS itself]
 before sensibly using this library.  That said, Bandalore's API
@@ -47,23 +49,23 @@ is well-documented.
 You'll first need to load the library and create a SQS client object
 to do anything:
 
-----
+```clojure
 (require '[cemerick.bandalore :as sqs])
 (def client (sqs/create-client "your aws id" "your aws secret-key"))
-----
+```
 
 You can create, delete, and list queues:
 
-----
-=> (sqs/create-queue client "foo")
+```clojure
+#> (sqs/create-queue client "foo")
 "https://queue.amazonaws.com/499312652346/foo"
-=> (sqs/list-queues client)
+#> (sqs/list-queues client)
 ("https://queue.amazonaws.com/499312652346/foo")
-=> (sqs/delete-queue client (first *1))
+#> (sqs/delete-queue client (first *1))
 nil
-=> (list-queues client)
+#> (list-queues client)
 nil
-----
+```
 
 *Note that SQS is _eventually consistent_. This means that a created
 queue won't necessarily show up in an immediate listing of queues,
@@ -71,95 +73,95 @@ messages aren't necessarily immediately available to be received, etc.*
 
 You can send, receive, and delete messages:
 
-----
-=> (def q (sqs/create-queue client "foo"))
+```clojure
+#> (def q (sqs/create-queue client "foo"))
 #'cemerick.bandalore-test/q
-=> (sqs/send client q "my message body")
+#> (sqs/send client q "my message body")
 {:id "75d5d7a1-2274-4163-97b2-aa4c75f209ee", :body-md5 "05d358de00fc63dd2fa2026b77e112f6"}
-=> (sqs/receive client q)
+#> (sqs/receive client q)
 ({:attrs #<HashMap {}>, :body "my message body", :body-md5 "05d358de00fc63dd2fa2026b77e112f6",
   :id "75d5d7a1-2274-4163-97b2-aa4c75f209ee",
   :receipt-handle "…very long string…"})
 ;;
 ;; …presumably do something with the received message(s)…
 ;;
-=> (sqs/delete client q (first *1))
+#> (sqs/delete client q (first *1))
 nil
-=> (sqs/receive client q)
+#> (sqs/receive client q)
 ()
-----
+```
 
 That's cleaner than having to interop directly with the Java SDK, but it's all
 pretty pedestrian stuff.  You can do more interesting things with some
 simple higher-order functions and other nifty Clojure facilities.
 
-=== Sending and receiving Clojure values
+### Sending and receiving Clojure values
 
 SQS' message bodies are strings, so you can stuff anything in them that you can
 serialize to a string.  That said, `pr-str` and `read-string` are too handy
 to not use, assuming your consumers are using Clojure as well:
 
-----
-=> (sqs/send client q (pr-str {:a 5 :b "blah" :c 6.022e23}))
+```clojure
+#> (sqs/send client q (pr-str {:a 5 :b "blah" :c 6.022e23}))
 {:id "3756c302-866a-4fcc-a7a3-746e6f531f47", :body-md5 "60052fc2ffb835257c26b9957c6e9ffd"}
-=> (-?> (sqs/receive client q) first :body read-string)
+#> (-?> (sqs/receive client q) first :body read-string)
 {:a 5, :b "blah", :c 6.022E23}
-----
+```
 
-=== Sending seqs of messages
+### Sending seqs of messages
 
 …with more gratuitous use of `pr-str` and `read-string` to send and receive
 Clojure values: 
 
-----
-=> (->> [:foo 'bar ["some vector" 42] #{#"silly place for a regex"}]
+```clojure
+#> (->> [:foo 'bar ["some vector" 42] #{#"silly place for a regex"}]
     (map (comp (partial sqs/send client q) pr-str))
     dorun)
 nil
-=> (map (comp read-string :body)
+#> (map (comp read-string :body)
     (sqs/receive client q :limit 10))
 (bar ["some vector" 42])
-=> (map (comp read-string :body)
+#> (map (comp read-string :body)
     (sqs/receive client q :limit 10))
 (#{#"silly place for a regex"})
-=> (map (comp read-string :body)
+#> (map (comp read-string :body)
     (sqs/receive client q :limit 10))
 (:foo)
-----
+```
 
-=== (Mostly) automatic deletion of consumed messages
+### (Mostly) automatic deletion of consumed messages
 
 When you're done processing a received message, you need to delete it from its
 originaing queue:
 
-----
+```clojure
    ; ensure our queue is empty to start
-=> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
 "0"
-=> (dorun (map (partial sqs/send client q) (map str (range 100))))
+#> (dorun (map (partial sqs/send client q) (map str (range 100))))
 nil
-=> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
 "100"
 
    ; received messages must be removed from the queue or they will
    ; be delivered again after their visibility timeout expires
-=> (sqs/receive client q)
+#> (sqs/receive client q)
 (…message seq…)
-=> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
 "100"
-=> (->> (sqs/receive client q) first (sqs/delete client))
+#> (->> (sqs/receive client q) first (sqs/delete client))
 nil
-=> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
 "99"
-----
+```
 
 Rather than trying to remember to do this, just use the
 `deleting-consumer` "middleware" to produce a function that calls
 the message-processing function you provide to it, and then
 automatically deletes the processed message from the origining queue:
 
-----
-=> (doall (map
+```clojure
+#> (doall (map
             (sqs/deleting-consumer client (comp println :body))
             (sqs/receive client q :limit 10)))
 0
@@ -173,11 +175,11 @@ automatically deletes the processed message from the origining queue:
 52
 55
 (nil nil nil nil nil nil nil nil nil nil)
-=> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
 "90"
-----
+```
 
-=== Consuming queues as seqs
+### Consuming queues as seqs
 
 seqs being the _lingua franca_ of Clojure collections, it would be helpful if we
 could treat an SQS queue as a seq of messages.  While `receive` does return
@@ -187,11 +189,11 @@ a seq of messages, each `receive` call is limited to receiving a maximum of
 The solution to this is `polling-receive`, which returns a lazy seq that
 reaches out to SQS as necessary:
 
-----
-=> (map (sqs/deleting-consumer client :body)
+```clojure
+#> (map (sqs/deleting-consumer client :body)
      (sqs/polling-receive client q :limit 10))
 ("3" "5" "7" "8" ... "81" "90" "91")
-----
+```
 
 `polling-receive` accepts all of the same optional kwargs as `receive` does,
 but adds two more to control its usage of `receive`:
@@ -210,21 +212,21 @@ terminate because none have been available for a while.
 Here's an example where one thread sends a message once a second for a minute,
 and another consumes those messages using a lazy seq provided by `polling-receive`:
 
-----
-=> (defn send-dummy-messages
+```clojure
+#> (defn send-dummy-messages
      [client q count]
      (future (doseq [n (range count)]
                (Thread/sleep 100)
                (sqs/send client q (str n)))))
 #'cemerick.bandalore-test/send-dummy-messages
-=> (defn consume-dummy-messages
+#> (defn consume-dummy-messages
      [client q]
      (future (dorun (map (sqs/deleting-consumer client (comp println :body))
                       (sqs/polling-receive client q :max-wait Integer/MAX_VALUE :limit 10)))))
 #'cemerick.bandalore-test/consume-dummy-messages
-=> (consume-dummy-messages client q)               ;; start the consumer
+#> (consume-dummy-messages client q)               ;; start the consumer
 #<core$future_call$reify__5500@a6f00bc: :pending>
-=> (send-dummy-messages client q 1000)             ;; start the sender
+#> (send-dummy-messages client q 1000)             ;; start the sender
 #<core$future_call$reify__5500@18986032: :pending>
 3
 4
@@ -235,20 +237,20 @@ and another consumes those messages using a lazy seq provided by `polling-receiv
 5
 7
 ...
-----
+```
 
 You'd presumably want to set up some ways to control your consumer, but hopefully
 you see that it would be trivial to parallelize the processing function being
 wrapped by `deleting-consumer` using `pmap`, distribute processing among agents
 if that's more appropriate, etc. 
 
-== Building Bandalore
+## Building Bandalore
 
 Have maven.  From the command line:
 
-----
-$ mvn clean install
-----
+```
+$ mvn clean verify
+```
 
 *The tests are all live*, so:
 
@@ -261,27 +263,27 @@ Since the tests are live, you either need to add your AWS credentials to your
 `~/.m2/settings.xml` file as properties, or specify them on the command line
 using `-D` switches:
 
-----
-$ mvn -Daws.id=XXXXXXX -Daws.secret-key=YYYYYYY clean install
-----
+```
+$ mvn -Daws.id#XXXXXXX -Daws.secret-key#YYYYYYY clean install
+```
 
 Or, you can skip the tests entirely:
 
-----
-$ mvn -Dmaven.test.skip=true clean install
-----
+```
+$ mvn -Dmaven.test.skip#true clean install
+```
 
 In any case, you'll find a built `.jar` file in the `target` directory, and in
 its designated spot in `~/.m2/repository` (assuming you ran `install` rather than
 e.g. `package`).
 
-== Need Help?
+## Need Help?
 
 Ping `cemerick` on freenode irc or twitter if you have questions
 or would like to contribute patches.
 
-== License
+## License
 
-Copyright © 2011 Chas Emerick
+Copyright © 2011-2012 Chas Emerick
 
 Licensed under the EPL. (See the file epl-v10.html.)
