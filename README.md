@@ -42,7 +42,7 @@ Translate as necessary if you're using log4j, etc.
 
 ## Usage
 
-You should be familiar with http://aws.amazon.com/sqs/[SQS itself]
+You should be familiar with [SQS itself](http://aws.amazon.com/sqs/)
 before sensibly using this library.  That said, Bandalore's API
 is well-documented.
 
