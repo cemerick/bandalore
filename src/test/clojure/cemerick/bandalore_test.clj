@@ -1,12 +1,7 @@
 (ns cemerick.bandalore-test
   (:use cemerick.bandalore
-    clojure.test
-    clojure.contrib.core)
+    clojure.test)
   (:refer-clojure :exclude (send)))
-
-#_(do
-    (System/setProperty "aws.id" "")
-    (System/setProperty "aws.secret-key" ""))
 
 ; kill the verbose aws logging
 (.setLevel (java.util.logging.Logger/getLogger "com.amazonaws")
@@ -56,11 +51,8 @@
   `(deftest ~name
      (println '~name) ; lots of sleeping in these tests, give some indication of life
      (binding [*test-queue-url* (create-queue client (test-queue-name))]
-       (try
-         (is *test-queue-url*)
-         ~@body
-         (finally
-           (delete-queue client *test-queue-url*))))))
+       (is *test-queue-url*)
+       ~@body)))
 
 (defsqstest test-list-queues
   (let [msg (uuid)]
@@ -70,15 +62,20 @@
       "Created queue not visible in result of list-queues")))
 
 (defsqstest test-queue-attrs
-  (let [{:strs [VisibilityTimeout MaximumMessageSize] :as base-attrs} (queue-attrs client *test-queue-url*)
-        expected {"VisibilityTimeout" "117" "MaximumMessageSize" "1535"}]
-    (is (and VisibilityTimeout MaximumMessageSize))
+  (let [{:strs [MaximumMessageSize] :as base-attrs} (queue-attrs client *test-queue-url*)
+        expected {"MaximumMessageSize" "1535"}]
+    (is MaximumMessageSize)
     (queue-attrs client *test-queue-url* expected)
-    (wait-for-condition #(= expected
-                           (->> (queue-attrs client *test-queue-url*)
-                             (filter (comp (set (keys expected)) first))
-                             (into {})))
+    (wait-for-condition #(= expected (select-keys (queue-attrs client *test-queue-url*) (keys expected)))
       "Queue attribute test failed after waiting for test condition")))
+
+(defsqstest receive-delete
+  (let [msg (uuid)]
+    (send client *test-queue-url* msg)
+    (let [[{:keys [body] :as rmsg}] (receive client *test-queue-url*)]
+      (is (= msg body))
+      (delete client *test-queue-url* rmsg)
+      (is (empty? (receive client *test-queue-url*))))))
 
 (defn- wait-for-full-queue
   [q min-cnt queue-name]
