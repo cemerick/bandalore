@@ -113,9 +113,9 @@
                                         :or {limit 1
                                              attributes #{}}}]
   (let [req (-> (ReceiveMessageRequest. queue-url)
-              (.withMaxNumberOfMessages (-> limit (min 10) (max 1)))
+              (.withMaxNumberOfMessages (-> limit (min 10) (max 1) Integer.))
               (.withAttributeNames attributes))
-        req (if visibility (.withVisibilityTimeout req visibility) req)]
+        req (if visibility (.withVisibilityTimeout req (Integer. visibility)) req)]
     (->> (.receiveMessage client req)
       .getMessages
       (map (partial message-map queue-url)))))

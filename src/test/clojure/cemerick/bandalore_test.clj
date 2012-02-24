@@ -13,7 +13,7 @@
     (assert (and id secret-key))
     (create-client id secret-key)))
 
-(def *test-queue-url* nil)
+(def ^{:dynamic true} *test-queue-url* nil)
 
 (defn- uuid
   []
