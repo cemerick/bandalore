@@ -25,16 +25,17 @@
     (AmazonSQSClient. (com.amazonaws.auth.BasicAWSCredentials. id secret-key)
       (.withUserAgent client-config "Bandalore - SQS for Clojure"))))
 
+(def ^{:private true} visibility-warned? (atom false))
+
 (defn create-queue
   "Creates a queue with the given name, returning the corresponding URL string.
-   Returns successfully if the queue already exists.
-
-   Specify an optional :visibility keyword arg to set the new queue's default
-   visibility timeout in seconds."
-  [^AmazonSQSClient client queue-name & {:keys [visibility]}]
-  (->> (if visibility
-        (CreateQueueRequest. queue-name visibility)
-        (CreateQueueRequest. queue-name))
+   Returns successfully if the queue already exists."
+  [^AmazonSQSClient client queue-name & {:as options}]
+  (when (and (:visibility options) (not @visibility-warned?))
+    (println "[WARNING] :visibility option to cemerick.bandalore/create-queue no longer supported;")
+    (println "[WARNING] See https://github.com/cemerick/bandalore/issues/3")
+    (reset! visibility-warned? true))
+  (->> (CreateQueueRequest. queue-name)
     (.createQueue client)
     .getQueueUrl))
 
@@ -113,9 +114,9 @@
                                         :or {limit 1
                                              attributes #{}}}]
   (let [req (-> (ReceiveMessageRequest. queue-url)
-              (.withMaxNumberOfMessages (-> limit (min 10) (max 1) Integer.))
+              (.withMaxNumberOfMessages (-> limit (min 10) (max 1) int Integer.))
               (.withAttributeNames attributes))
-        req (if visibility (.withVisibilityTimeout req (Integer. visibility)) req)]
+        req (if visibility (.withVisibilityTimeout req (Integer. (int visibility))) req)]
     (->> (.receiveMessage client req)
       .getMessages
       (map (partial message-map queue-url)))))
