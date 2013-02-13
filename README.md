@@ -222,7 +222,7 @@ and another consumes those messages using a lazy seq provided by `polling-receiv
 #> (defn consume-dummy-messages
      [client q]
      (future (dorun (map (sqs/deleting-consumer client (comp println :body))
-                      (sqs/polling-receive client q :max-wait Integer/MAX_VALUE :limit 10)))))
+                      (sqs/polling-receive client q :max-wait Long/MAX_VALUE :limit 10)))))
 #'cemerick.bandalore-test/consume-dummy-messages
 #> (consume-dummy-messages client q)               ;; start the consumer
 #<core$future_call$reify__5500@a6f00bc: :pending>
