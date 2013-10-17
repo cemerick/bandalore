@@ -56,7 +56,7 @@ to do anything:
 
 **Security Note** If your application using Bandalore is deployed to EC2, _you
 should not put your AWS credentials on those EC2 nodes_.  Rather,
-  [give your EC2 instances IAM roles](http://docs.aws.amazon.com/IAM/latest/UserGuide/role-usecase-ec2app.html),
+  [give your EC2 instances IAM roles](http://docs.aws.amazon.com/AWSSdkDocsJava/latest/DeveloperGuide/java-dg-roles.html),
   and use the nullary arity of `create-client`:
   
 ```clojure
