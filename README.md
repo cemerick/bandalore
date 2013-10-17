@@ -54,7 +54,6 @@ to do anything:
 (def client (sqs/create-client "your aws id" "your aws secret-key"))
 ```
 
-<div style="border:5px solid gray">
 **Security Note** If your application using Bandalore is deployed to EC2, _you
 should not put your AWS credentials on those EC2 nodes_.  Rather,
   [give your EC2 instances IAM roles](http://docs.aws.amazon.com/IAM/latest/UserGuide/role-usecase-ec2app.html),
@@ -67,7 +66,6 @@ should not put your AWS credentials on those EC2 nodes_.  Rather,
 
 This will use credentials assigned to your EC2 node based on its
 role that are automatically rotated.
-</div>
 
 You can create, delete, and list queues:
 
