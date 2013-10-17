@@ -14,17 +14,17 @@ Bandalore is available in Maven central.  Add it to your Maven project's `pom.xm
 <dependency>
   <groupId>com.cemerick</groupId>
   <artifactId>bandalore</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
 </dependency>
 ```
 
 or your leiningen project.clj:
 
 ```clojure
-[com.cemerick/bandalore "0.0.3"]
+[com.cemerick/bandalore "0.0.4"]
 ```
 
-Bandalore is compatible with Clojure 1.2.0 - 1.4.0.
+Bandalore is compatible with Clojure 1.2.0+.
 
 ## Logging
 
@@ -277,13 +277,13 @@ Since the tests are live, you either need to add your AWS credentials to your
 using `-D` switches:
 
 ```
-$ mvn -Daws.id#XXXXXXX -Daws.secret-key#YYYYYYY clean install
+$ mvn -Daws.id=XXXXXXX -Daws.secret-key=YYYYYYY clean install
 ```
 
 Or, you can skip the tests entirely:
 
 ```
-$ mvn -Dmaven.test.skip#true clean install
+$ mvn -Dmaven.test.skip=true clean install
 ```
 
 In any case, you'll find a built `.jar` file in the `target` directory, and in
@@ -297,6 +297,6 @@ or would like to contribute patches.
 
 ## License
 
-Copyright © 2011-2012 Chas Emerick
+Copyright © 2011-2013 Chas Emerick and contributors.
 
 Licensed under the EPL. (See the file epl-v10.html.)
