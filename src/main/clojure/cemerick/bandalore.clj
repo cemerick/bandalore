@@ -19,6 +19,11 @@
 (defn create-client
   "Creates a synchronous AmazonSQSClient using the provided account id, secret key,
    and optional com.amazonaws.ClientConfiguration."
+  ([]
+    (create-client (com.amazonaws.ClientConfiguration.)))
+  ([client-config]
+    (AmazonSQSClient.
+      (.withUserAgent client-config "Bandalore - SQS for Clojure")))
   ([id secret-key]
     (create-client id secret-key (com.amazonaws.ClientConfiguration.)))
   ([id secret-key client-config]
