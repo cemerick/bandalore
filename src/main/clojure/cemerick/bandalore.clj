@@ -52,7 +52,7 @@
 (defn list-queues
   "Returns a seq of all queues' URL strings.  Takes an optional string prefix
   argument to only list queues with names that start with the prefix."
-  [^AmazonSQSClient client &[prefix]]
+  [^AmazonSQSClient client & {:keys [prefix]}]
   (->> (ListQueuesRequest. prefix)
     (.listQueues client)
     .getQueueUrls

@@ -60,7 +60,7 @@
     (send client *test-queue-url* msg)
     (wait-for-condition #((set (list-queues client)) *test-queue-url*)
       "Created queue not visible in result of list-queues")
-    (wait-for-condition #((set (list-queues client test-queue-name-prefix)) *test-queue-url*)
+    (wait-for-condition #((set (list-queues client :prefix test-queue-name-prefix)) *test-queue-url*)
       "Created queue not visible in result of list-queues with prefix")))
 
 (defsqstest test-queue-attrs
