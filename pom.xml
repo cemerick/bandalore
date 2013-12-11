@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cemerick</groupId>
     <artifactId>bandalore</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
     <name>bandalore</name>
     <description>A Clojure library for Amazon's Simple Queue Service (SQS).</description>
     <url>http://github.com/cemerick/bandalore</url>
