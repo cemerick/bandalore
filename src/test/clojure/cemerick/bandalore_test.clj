@@ -121,3 +121,11 @@
   (let [v (-> (receive client *test-queue-url* :visibility 5) first :body read-string)]
     (is (some #(= v (-> % :body read-string)) (polling-receive client *test-queue-url* :max-wait 10000)))))
 
+(defsqstest test-receive-long-polling
+  (let [q *test-queue-url*
+        no-poll (future (receive client q))
+        long-poll (future (receive client q :wait-time-seconds 20))]
+    (Thread/sleep 10000)
+    (send client q "1")
+    (is (== 0 (count @no-poll)) "Should not return messages")
+    (is (== 1 (count @long-poll)) "Should return 1 message")))

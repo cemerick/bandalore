@@ -106,6 +106,11 @@
              Defaults to the empty set (i.e. no attributes will be included in
              received messages).
              See the SQS documentation for all support message attributes.
+   :wait-time-seconds - enables long poll support. time is in seconds, bewteen
+             0 (default - no long polling) and 20.
+             Allows Amazon SQS service to wait until a message is available
+             in the queue before sending a response.
+             See the SQS documentation at (http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-long-polling.html)
 
    Returns a seq of maps with these slots:
    
@@ -116,12 +121,16 @@
    :receipt-handle - the ID used to delete the message from the queue after
              it has been fully processed.
    :source-queue - the URL of the queue from which the message was received"
-  [^AmazonSQSClient client queue-url & {:keys [limit visibility ^java.util.Collection attributes]
+  [^AmazonSQSClient client queue-url & {:keys [limit
+                                               visibility
+                                               wait-time-seconds
+                                               ^java.util.Collection attributes]
                                         :or {limit 1
                                              attributes #{}}}]
   (let [req (-> (ReceiveMessageRequest. queue-url)
               (.withMaxNumberOfMessages (-> limit (min 10) (max 1) int Integer.))
               (.withAttributeNames attributes))
+        req (if wait-time-seconds (.withWaitTimeSeconds req (Integer. (int wait-time-seconds))) req)
         req (if visibility (.withVisibilityTimeout req (Integer. (int visibility))) req)]
     (->> (.receiveMessage client req)
       .getMessages
