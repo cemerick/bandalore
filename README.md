@@ -14,14 +14,14 @@ Bandalore is available in Maven central.  Add it to your Maven project's `pom.xm
 <dependency>
   <groupId>com.cemerick</groupId>
   <artifactId>bandalore</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
 </dependency>
 ```
 
 or your leiningen project.clj:
 
 ```clojure
-[com.cemerick/bandalore "0.0.5"]
+[com.cemerick/bandalore "0.0.6"]
 ```
 
 Bandalore is compatible with Clojure 1.2.0+.
