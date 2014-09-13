@@ -108,6 +108,28 @@ That's cleaner than having to interop directly with the Java SDK, but it's all
 pretty pedestrian stuff.  You can do more interesting things with some
 simple higher-order functions and other nifty Clojure facilities.
 
+### Enabling SQS Long Polling
+
+[Long polling](http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-long-polling.html) reduces the number of empty responses by allowing Amazon SQS service to wait until a message is available in the queue before sending a response. You can enable long polling on an individual receive request by supplying the optional kwarg `:wait-time-seconds`:
+
+  :wait-time-seconds - time in seconds (bewteen 0 and 20) for SQS to wait if there are no messages in the queue. A value of 0 indicates no long polling.
+
+```clojure
+   ; ensure our queue is empty to start
+#> (get (sqs/queue-attrs client q) "ApproximateNumberOfMessages")
+"0"
+#> (let [no-polling (future (sqs/receive client q))
+         long-polling (future (sqs/receive client q :wait-time-seconds 20))]
+    (Thread/sleep 10000)                 ;; Sleep 10s before sending message
+    (sqs/send client q "my message body")
+    (println (count @no-polling))
+    (println (count @long-polling)))
+0
+1
+nil
+
+```
+
 ### Sending and receiving Clojure values
 
 SQS' message bodies are strings, so you can stuff anything in them that you can
