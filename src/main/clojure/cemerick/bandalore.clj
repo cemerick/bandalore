@@ -11,9 +11,9 @@
     (com.amazonaws.services.sqs.model
       AddPermissionRequest ChangeMessageVisibilityRequest CreateQueueRequest
       DeleteMessageRequest DeleteQueueRequest GetQueueAttributesRequest
-      ListQueuesRequest Message ReceiveMessageRequest ReceiveMessageResult
-      RemovePermissionRequest SendMessageRequest SendMessageResult
-      SetQueueAttributesRequest))
+      GetQueueUrlRequest ListQueuesRequest Message ReceiveMessageRequest
+      ReceiveMessageResult RemovePermissionRequest SendMessageRequest
+      SendMessageResult SetQueueAttributesRequest))
   (:refer-clojure :exclude (send)))
 
 (defn create-client
@@ -57,6 +57,11 @@
     (.listQueues client)
     .getQueueUrls
     seq))
+
+(defn queue-url
+  "Returns the URL for a named queue"
+  [^AmazonSQSClient client queue-name]
+   (.getQueueUrl (GetQueueUrlRequest. queue-name)))
 
 (defn queue-attrs
   "Gets or sets the attributes of a queue specified by its URL string.
